@@ -80,25 +80,47 @@ The card shows a plain-English sentence of what your settings produce, e.g.
 
 ---
 
-## Deploy it (so the link works 24/7)
+## How it's hosted
 
-A subscription needs a URL your calendar can reach any time. Any free host works.
+The feed is published as a **static file on GitHub Pages**, rebuilt nightly by a GitHub
+Action ([.github/workflows/publish.yml](.github/workflows/publish.yml)). No server, no
+hosting bill, no cold starts, nothing to keep awake.
 
-**Render.com:**
-1. Push this folder to a GitHub repo.
-2. Render → **New → Web Service** → pick the repo.
-3. Build: `npm install` · Start: `npm start`.
-4. Feed URL: `https://your-app.onrender.com/prayers.ics`
+```
+nightly (02:17 UTC) ─┐
+push to main ────────┼─> npm ci -> verify -> build-site.js -> dist/ -> GitHub Pages
+manual dispatch ─────┘
+```
 
-> ⚠️ **Set `ADMIN_PASSWORD`** as an environment variable once it's on a public URL —
-> otherwise anyone with the link can change your settings. The feed itself stays public
-> (calendars can't send passwords); only editing is locked.
+`src/build-site.js` writes `dist/prayers.ics` (a fresh 180-day window) and `dist/index.html`
+(a landing page with the subscribe link and today's times). The workflow runs `verify.js`
+first, so a config change that breaks the timing rules fails the build instead of quietly
+publishing wrong times.
 
-> ⚠️ **Settings persistence:** settings are stored in `config.json` next to the app. On hosts
-> with ephemeral disks (Render free tier) a redeploy resets them to the committed file. Either
-> commit your settings, or attach a persistent disk and point `CONFIG_PATH` at it.
+### Changing settings
 
-Railway, Fly.io, or a small VPS work the same way — the app reads `PORT` from the environment.
+The settings UI needs a server to save changes, so it runs on your own machine:
+
+```bash
+npm start
+```
+
+Edit at <http://localhost:3000>, press **Save changes** (writes `config.json`), then:
+
+```bash
+git add config.json && git commit -m "Update prayer settings" && git push
+```
+
+The push triggers a rebuild and your calendar picks it up on its next refresh. Your laptop
+does **not** need to stay on — the published feed keeps working regardless.
+
+### Self-hosting the server instead (optional)
+
+`npm start` also serves the feed at `/prayers.ics`, so the app can run as a normal web
+service on Render/Railway/Fly/a VPS if you ever want the settings UI online. It reads `PORT`
+from the environment. If you do that, set `ADMIN_PASSWORD` so strangers can't edit your
+settings, and note that hosts with ephemeral disks reset `config.json` on redeploy unless you
+point `CONFIG_PATH` at a persistent disk.
 
 ---
 
