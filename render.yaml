@@ -1,0 +1,17 @@
+# Render blueprint. With this file in the repo root, Render can configure the
+# service automatically instead of you filling the fields in by hand.
+services:
+  - type: web
+    name: prayer-calendar
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/meta
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      # sync: false means Render prompts you to type a value in the dashboard —
+      # the password is never stored in this repo.
+      - key: ADMIN_PASSWORD
+        sync: false

@@ -1,0 +1,92 @@
+{
+  "calendarName": "Prayer Times — Alexandria",
+  "location": {
+    "city": "Alexandria",
+    "latitude": 31.2001,
+    "longitude": 29.9187,
+    "timezone": "Africa/Cairo"
+  },
+  "calculation": {
+    "method": "Egyptian",
+    "madhab": "Shafi",
+    "highLatitudeRule": "MiddleOfTheNight",
+    "adjustments": {
+      "fajr": 0,
+      "sunrise": 0,
+      "dhuhr": 0,
+      "asr": 0,
+      "maghrib": 0,
+      "isha": 0
+    }
+  },
+  "feed": {
+    "daysAhead": 180,
+    "defaultLeadMinutes": 10,
+    "defaultDurationMinutes": 40,
+    "defaultReminderMinutes": 0
+  },
+  "prayers": {
+    "fajr": {
+      "enabled": true,
+      "label": "Fajr",
+      "emoji": "🌙",
+      "leadMinutes": 10,
+      "durationMinutes": 50,
+      "reminderMinutes": 0
+    },
+    "sunrise": {
+      "enabled": false,
+      "label": "Shuruq (Sunrise)",
+      "emoji": "🌅",
+      "leadMinutes": 0,
+      "durationMinutes": 15,
+      "reminderMinutes": 0
+    },
+    "dhuhr": {
+      "enabled": true,
+      "label": "Dhuhr",
+      "emoji": "☀️",
+      "leadMinutes": 10,
+      "durationMinutes": 40,
+      "reminderMinutes": 0
+    },
+    "asr": {
+      "enabled": true,
+      "label": "Asr",
+      "emoji": "🌤️",
+      "leadMinutes": 10,
+      "durationMinutes": 40,
+      "reminderMinutes": 0
+    },
+    "maghrib": {
+      "enabled": true,
+      "label": "Maghrib",
+      "emoji": "🌇",
+      "leadMinutes": 10,
+      "durationMinutes": 40,
+      "reminderMinutes": 0
+    },
+    "isha": {
+      "enabled": true,
+      "label": "Isha",
+      "emoji": "🌃",
+      "leadMinutes": 10,
+      "durationMinutes": 40,
+      "reminderMinutes": 0
+    }
+  },
+  "jumuah": {
+    "enabled": true,
+    "replaceDhuhr": true,
+    "label": "Jumu'ah",
+    "emoji": "🕌",
+    "location": "",
+    "leadMinutes": 30,
+    "durationMinutes": 90,
+    "reminderMinutes": 0,
+    "timeMode": "dhuhr",
+    "fixedTime": "13:00",
+    "offsetMinutesFromDhuhr": 30,
+    "notes": ""
+  }
+}

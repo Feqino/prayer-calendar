@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prayer Calendar — Settings</title>
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕌</text></svg>">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand"><span class="brand-mark">🕌</span> <span id="calTitle">Prayer Calendar</span></div>
+    <span class="pill" id="locPill">—</span>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ── Subscribe ───────────────────────────────────────────── -->
+  <section class="card accent">
+    <h2>Your calendar link</h2>
+    <p class="muted">Add this once to Google or Apple Calendar. It refreshes on its own — you never do this again.</p>
+    <div class="feedrow">
+      <input id="feedUrl" readonly>
+      <button id="copyBtn" class="btn">Copy</button>
+    </div>
+    <details class="how">
+      <summary>How do I add it?</summary>
+      <p><b>Google Calendar</b> (on a computer): Settings → <i>Add calendar</i> → <i>From URL</i> → paste → <i>Add calendar</i>.</p>
+      <p><b>iPhone / Apple</b>: Settings → Calendar → Accounts → Add Account → Other → <i>Add Subscribed Calendar</i> → paste.</p>
+      <p><b>Outlook</b>: Add calendar → <i>Subscribe from web</i> → paste.</p>
+      <p class="muted small">Calendars re-check the link every several hours, so edits you make here show up on their next refresh — existing events are updated in place, not duplicated.</p>
+    </details>
+  </section>
+
+  <!-- ── Location ────────────────────────────────────────────── -->
+  <section class="card">
+    <h2>Location &amp; calculation</h2>
+    <div class="grid">
+      <label>Calendar name<input id="calendarName" maxlength="80"></label>
+      <label>City<input id="city" maxlength="80"></label>
+      <label>Latitude<input id="latitude" type="number" step="0.0001"></label>
+      <label>Longitude<input id="longitude" type="number" step="0.0001"></label>
+      <label>Time zone<input id="timezone" list="tzList" maxlength="64">
+        <datalist id="tzList"></datalist>
+      </label>
+      <label>Calculation method<select id="method"></select></label>
+      <label>Asr method (madhab)
+        <select id="madhab">
+          <option value="Shafi">Standard — Shafi'i / Maliki / Hanbali</option>
+          <option value="Hanafi">Hanafi — later Asr</option>
+        </select>
+      </label>
+      <label>Days generated ahead<input id="daysAhead" type="number" min="30" max="730" step="1"></label>
+    </div>
+    <button id="locateBtn" class="btn ghost small">📍 Use my current location</button>
+  </section>
+
+  <!-- ── Prayers ─────────────────────────────────────────────── -->
+  <section class="card">
+    <h2>The five prayers</h2>
+    <p class="muted">
+      <b>Starts before</b> = how many minutes before the adhan the event opens.
+      <b>Total length</b> = how long the whole event runs.
+      <br>Example: 10 before + 40 total = from 10 min before the adhan until 30 min after.
+    </p>
+    <div class="tablehead">
+      <span>Prayer</span><span>On</span><span>Starts before</span><span>Total length</span><span>Alert</span><span>Fine-tune</span>
+    </div>
+    <div id="prayerRows"></div>
+    <p class="muted small">“Fine-tune” shifts the calculated adhan time itself, in minutes, if your local mosque differs.</p>
+  </section>
+
+  <!-- ── Jumu'ah ─────────────────────────────────────────────── -->
+  <section class="card jumuah">
+    <h2>🕌 Jumu'ah (Friday)</h2>
+    <div class="switchrow">
+      <label class="switch"><input type="checkbox" id="jEnabled"><span>Add a Jumu'ah event on Fridays</span></label>
+      <label class="switch"><input type="checkbox" id="jReplace"><span>Replace Friday's Dhuhr with it</span></label>
+    </div>
+
+    <div class="grid">
+      <label>Event title<input id="jLabel" maxlength="60"></label>
+      <label>Emoji<input id="jEmoji" maxlength="8"></label>
+      <label class="span2">Mosque / location <span class="muted small">(optional — shows on the event)</span>
+        <input id="jLocation" maxlength="200" placeholder="e.g. Al-Qa'id Ibrahim Mosque">
+      </label>
+
+      <label class="span2">When is Jumu'ah?
+        <select id="jTimeMode">
+          <option value="dhuhr">At the calculated Dhuhr time</option>
+          <option value="fixed">At a fixed time I set (my mosque's khutbah)</option>
+          <option value="offset">A set number of minutes after Dhuhr</option>
+        </select>
+      </label>
+      <label id="jFixedWrap">Fixed time<input id="jFixedTime" type="time"></label>
+      <label id="jOffsetWrap">Minutes after Dhuhr<input id="jOffset" type="number" min="-120" max="240" step="5"></label>
+
+      <label>Starts before (min)<input id="jLead" type="number" min="0" max="180" step="5"></label>
+      <label>Total length (min)<input id="jDuration" type="number" min="5" max="480" step="5"></label>
+      <label>Alert before (min)<input id="jReminder" type="number" min="0" max="240" step="5"></label>
+      <label class="span2">Notes<input id="jNotes" maxlength="500" placeholder="Optional note on the event"></label>
+    </div>
+    <p class="jsummary" id="jSummary"></p>
+  </section>
+
+  <!-- ── Preview ─────────────────────────────────────────────── -->
+  <section class="card">
+    <h2>Preview <span class="muted small">— next 7 days, live</span></h2>
+    <div id="preview" class="preview">Loading…</div>
+  </section>
+
+  <p class="foot muted small">Times computed offline with the <code>adhan</code> library. No account, no tracking.</p>
+</main>
+
+<div class="savebar">
+  <div class="wrap savebar-inner">
+    <span id="status" class="status"></span>
+    <button id="saveBtn" class="btn primary">Save changes</button>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

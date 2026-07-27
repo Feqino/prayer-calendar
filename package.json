@@ -1,0 +1,20 @@
+{
+  "name": "prayer-calendar",
+  "version": "1.0.0",
+  "description": "Subscribable ICS feed of the five daily prayers (+ configurable Jumu'ah) for Google/Apple Calendar",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "ics": "node src/generate-file.js",
+    "test-times": "node src/verify.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "adhan": "^4.4.3",
+    "express": "^4.19.2",
+    "luxon": "^3.4.4"
+  }
+}
