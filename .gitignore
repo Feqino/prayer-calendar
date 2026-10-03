@@ -2,3 +2,5 @@ node_modules/
 dist/
 prayers.ics
 .env
+.claude-flow/
+.vercel/
