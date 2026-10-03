@@ -8,7 +8,7 @@ import { loadConfig } from './config.js';
 
 const config = loadConfig();
 const days = computeSchedule(config);
-const ics = buildICS(days, config);
+const ics = buildICS(days, config, { baseUrl: process.env.PUBLIC_URL });
 const out = process.env.OUT || 'prayers.ics';
 writeFileSync(out, ics, 'utf8');
 

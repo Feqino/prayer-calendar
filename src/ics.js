@@ -34,10 +34,17 @@ function fold(line) {
   return chunks.join(CRLF + ' ');
 }
 
-export function buildICS(days, config) {
+/**
+ * @param {object} opts
+ * @param {string} [opts.baseUrl] Settings site root. When given, every event
+ *   carries a deep link to its own row in the editor, so tapping a prayer in
+ *   the calendar leads straight to where its timings are changed.
+ */
+export function buildICS(days, config, opts = {}) {
   const now = fmtUtc(new Date());
   const domain = 'prayer-calendar';
   const calName = config.calendarName || 'Prayer Times';
+  const baseUrl = (opts.baseUrl || '').replace(/\/+$/, '');
 
   const lines = [
     'BEGIN:VCALENDAR',
@@ -54,10 +61,17 @@ export function buildICS(days, config) {
   for (const day of days) {
     for (const ev of day.events) {
       const summary = ev.emoji ? `${ev.emoji} ${ev.label}` : ev.label;
+      const editUrl = baseUrl ? `${baseUrl}/#${ev.key}` : '';
+
+      const window = ev.leadMinutes
+        ? `${ev.leadMinutes} min before the adhan until ${ev.durationMinutes - ev.leadMinutes} min after.`
+        : `${ev.durationMinutes} min from the adhan.`;
+
       const desc = [
         `Adhan at ${ev.adhanLocal}`,
-        ev.leadMinutes ? `Event starts ${ev.leadMinutes} min before the adhan.` : null,
+        `This event runs ${window}`,
         ev.notes || null,
+        editUrl ? `\nChange ${ev.label}'s timings:\n${editUrl}` : null,
       ].filter(Boolean).join('\n');
 
       lines.push('BEGIN:VEVENT');
@@ -67,6 +81,7 @@ export function buildICS(days, config) {
       lines.push('DTEND:' + fmtUtc(ev.end));
       lines.push('SUMMARY:' + escapeText(summary));
       lines.push('DESCRIPTION:' + escapeText(desc));
+      if (editUrl) lines.push('URL;VALUE=URI:' + editUrl);
       if (ev.location) lines.push('LOCATION:' + escapeText(ev.location));
       lines.push('TRANSP:TRANSPARENT');
 

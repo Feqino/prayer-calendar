@@ -1,0 +1,13 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "config.json",
+      "maxDuration": 15
+    }
+  },
+  "rewrites": [
+    { "source": "/prayers.ics", "destination": "/api" },
+    { "source": "/api/(.*)", "destination": "/api" }
+  ]
+}

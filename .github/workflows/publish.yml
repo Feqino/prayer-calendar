@@ -33,6 +33,8 @@ jobs:
         run: node src/verify.js
       - name: Build feed and landing page
         run: node src/build-site.js
+        env:
+          PUBLIC_URL: ${{ vars.PUBLIC_URL }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

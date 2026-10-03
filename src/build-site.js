@@ -13,7 +13,7 @@ import { loadConfig } from './config.js';
 
 const config = loadConfig();
 const days = computeSchedule(config);
-const ics = buildICS(days, config);
+const ics = buildICS(days, config, { baseUrl: process.env.PUBLIC_URL });
 
 const outDir = process.env.OUT_DIR || 'dist';
 mkdirSync(outDir, { recursive: true });

@@ -28,6 +28,32 @@ async function init() {
   formFromConfig(config);
   wireEvents();
   refreshPreview();
+  showSaveState();
+  focusFromHash();
+}
+
+// Saving can be unavailable (a deployment without write access) — say so up
+// front instead of letting the Save button fail.
+function showSaveState() {
+  if (meta.canSave) return;
+  const n = $('notice');
+  n.textContent = `You can look around and preview changes, but they can't be saved yet. ${meta.saveBlockedReason}`;
+  n.hidden = false;
+  $('saveBtn').disabled = true;
+}
+
+// Calendar events link here as /#fajr, /#asr, /#jumuah … — jump to that
+// prayer's settings and put the cursor in its "after adhan" field.
+function focusFromHash() {
+  const key = location.hash.replace('#', '').toLowerCase();
+  if (!key) return;
+  const isJumuah = key === 'jumuah';
+  const target = isJumuah ? $('jumuahCard') : $(`row-${key}`);
+  if (!target) return;
+  target.classList.add('focused');
+  target.scrollIntoView({ block: 'center' });
+  const field = isJumuah ? $('jAfter') : $(`${key}-after`);
+  if (field) field.focus({ preventScroll: true });
 }
 
 // ── populate selects ─────────────────────────────────────────────────────────
@@ -50,10 +76,10 @@ function fillTimezones() {
 function buildPrayerRows() {
   $('prayerRows').innerHTML = PRAYERS.map((k) => `
     <div class="prow" id="row-${k}">
-      <div class="pname"><span id="emoji-${k}"></span><span id="name-${k}"></span></div>
+      <div class="pname"><span id="emoji-${k}"></span><span id="name-${k}"></span><span class="total" id="total-${k}"></span></div>
       <label class="mini"><span>Enabled</span><input type="checkbox" id="${k}-enabled"></label>
-      <label class="mini"><span>Starts before</span><input type="number" id="${k}-lead" min="0" max="180" step="5"></label>
-      <label class="mini"><span>Total length</span><input type="number" id="${k}-duration" min="5" max="480" step="5"></label>
+      <label class="mini"><span>Before adhan</span><input type="number" id="${k}-lead" min="0" max="180" step="5"></label>
+      <label class="mini"><span>After adhan</span><input type="number" id="${k}-after" min="0" max="480" step="5"></label>
       <label class="mini"><span>Alert</span><input type="number" id="${k}-reminder" min="0" max="240" step="5"></label>
       <label class="mini"><span>Fine-tune</span><input type="number" id="${k}-adjust" min="-60" max="60" step="1"></label>
     </div>`).join('');
@@ -76,7 +102,7 @@ function formFromConfig(c) {
     $(`name-${k}`).textContent = p.label;
     $(`${k}-enabled`).checked = p.enabled;
     $(`${k}-lead`).value = p.leadMinutes;
-    $(`${k}-duration`).value = p.durationMinutes;
+    $(`${k}-after`).value = Math.max(0, p.durationMinutes - p.leadMinutes);
     $(`${k}-reminder`).value = p.reminderMinutes;
     $(`${k}-adjust`).value = c.calculation.adjustments[k] || 0;
     $(`row-${k}`).classList.toggle('off', !p.enabled);
@@ -92,7 +118,7 @@ function formFromConfig(c) {
   $('jFixedTime').value = j.fixedTime;
   $('jOffset').value = j.offsetMinutesFromDhuhr;
   $('jLead').value = j.leadMinutes;
-  $('jDuration').value = j.durationMinutes;
+  $('jAfter').value = Math.max(0, j.durationMinutes - j.leadMinutes);
   $('jReminder').value = j.reminderMinutes;
   $('jNotes').value = j.notes;
 
@@ -109,7 +135,7 @@ function configFromForm() {
       label: config.prayers[k].label,
       emoji: config.prayers[k].emoji,
       leadMinutes: num(`${k}-lead`),
-      durationMinutes: num(`${k}-duration`),
+      durationMinutes: total(`${k}-lead`, `${k}-after`),
       reminderMinutes: num(`${k}-reminder`),
     };
   }
@@ -137,7 +163,7 @@ function configFromForm() {
       emoji: $('jEmoji').value,
       location: $('jLocation').value,
       leadMinutes: num('jLead'),
-      durationMinutes: num('jDuration'),
+      durationMinutes: total('jLead', 'jAfter'),
       reminderMinutes: num('jReminder'),
       timeMode: $('jTimeMode').value,
       fixedTime: $('jFixedTime').value,
@@ -152,6 +178,10 @@ const num = (id) => {
   return Number.isFinite(v) ? v : 0;
 };
 
+// The form asks for minutes before and after the adhan; settings store the
+// lead plus the event's total length.
+const total = (leadId, afterId) => Math.max(0, num(leadId)) + Math.max(0, num(afterId));
+
 // ── reactive chrome (titles, conditional fields, Jumu'ah sentence) ───────────
 function syncChrome() {
   $('calTitle').textContent = $('calendarName').value || 'Prayer Calendar';
@@ -161,12 +191,15 @@ function syncChrome() {
   $('jFixedWrap').style.display = mode === 'fixed' ? '' : 'none';
   $('jOffsetWrap').style.display = mode === 'offset' ? '' : 'none';
 
-  for (const k of PRAYERS) $(`row-${k}`).classList.toggle('off', !$(`${k}-enabled`).checked);
+  for (const k of PRAYERS) {
+    $(`row-${k}`).classList.toggle('off', !$(`${k}-enabled`).checked);
+    $(`total-${k}`).textContent = `${total(`${k}-lead`, `${k}-after`)} min`;
+  }
 
   // Plain-English summary of what the Jumu'ah settings produce.
   const lead = num('jLead');
-  const dur = num('jDuration');
-  const after = dur - lead;
+  const after = num('jAfter');
+  const dur = lead + after;
   const when = mode === 'fixed' ? `${$('jFixedTime').value || '—'}`
     : mode === 'offset' ? `${num('jOffset')} min after Dhuhr`
     : 'the Dhuhr time';
@@ -265,12 +298,12 @@ async function save() {
     });
     const data = await res.json();
     if (!res.ok) {
-      if (res.status === 401) sessionStorage.removeItem('pw');
+      if (res.status === 401) forgetPassword();
       throw new Error(data.error || 'Save failed');
     }
     config = data.config;
     formFromConfig(config);
-    setStatus('Saved. Your calendar will pick this up on its next refresh.', 'ok');
+    setStatus('Saved. Your calendar picks this up on its next refresh (can take a few hours).', 'ok');
     refreshPreview();
   } catch (err) {
     setStatus(err.message, 'err');
@@ -279,13 +312,19 @@ async function save() {
   }
 }
 
+// Remembered on this device so editing from a calendar link stays one tap.
 function getPassword() {
-  let pw = sessionStorage.getItem('pw');
+  let pw = null;
+  try { pw = localStorage.getItem('pw'); } catch { /* storage unavailable */ }
   if (!pw) {
     pw = prompt('Settings password:');
-    if (pw) sessionStorage.setItem('pw', pw);
+    try { if (pw) localStorage.setItem('pw', pw); } catch { /* storage unavailable */ }
   }
   return pw;
+}
+
+function forgetPassword() {
+  try { localStorage.removeItem('pw'); } catch { /* storage unavailable */ }
 }
 
 function setStatus(msg, kind = '') {

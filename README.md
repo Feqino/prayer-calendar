@@ -1,6 +1,6 @@
 # 🕌 Prayer Calendar — Alexandria
 
-A self-hosted, subscribable **ICS feed** of the five daily prayers, with a **web settings
+A subscribable **ICS feed** of the five daily prayers, with a **web settings
 interface** to change everything later. Same model as Fajr Calendar: you add one link to
 Google/Apple Calendar and it refreshes itself forever.
 
@@ -44,8 +44,7 @@ Everything is editable at the root URL — no config file editing needed:
 
 - **Location & calculation** — city, coordinates (or one-tap "use my current location"),
   timezone, calculation method, madhab.
-- **The five prayers** — per prayer: on/off, minutes *before* the adhan the event starts,
-  total event length, alert, and a *fine-tune* offset that nudges the calculated adhan time
+- **The five prayers** — per prayer: on/off, minutes before and after the adhan, alert, and a *fine-tune* offset that nudges the calculated adhan time
   itself if your local mosque differs by a minute or two.
 - **Jumu'ah** — its own full block (see below).
 - **Live preview** — the next 7 days recompute as you type, *before* you save, so you can
@@ -56,12 +55,14 @@ numbers are clamped rather than accepted.
 
 ### The two timing numbers
 
-Each prayer has **starts before** and **total length**:
+Each prayer has **before adhan** and **after adhan** minutes:
 
 ```
-adhan 13:08 · starts before 10 · total length 40
-   -> event runs 12:58 – 13:38   (10 min before, 30 min after)
+adhan 13:08 · before 10 · after 30
+   -> event runs 12:58 – 13:38   (40 minutes)
 ```
+
+(`config.json` stores these as `leadMinutes` and the total `durationMinutes`.)
 
 ### Jumu'ah settings
 
@@ -70,57 +71,49 @@ adhan 13:08 · starts before 10 · total length 40
 | Enabled | Adds a Jumu'ah event on Fridays |
 | Replace Friday's Dhuhr | On = Dhuhr is removed that day. Off = you get both. |
 | When is Jumu'ah? | `At the Dhuhr time` · `At a fixed time I set` · `A set number of minutes after Dhuhr` |
-| Starts before / Total length | Same two numbers as the other prayers |
+| Before / after the prayer | Same two numbers as the other prayers |
 | Mosque / location | Optional — appears in the event's Location field |
 | Title, emoji, notes, alert | Cosmetic / reminder options |
-
-The card shows a plain-English sentence of what your settings produce, e.g.
-*"Every Friday: 🕌 Jumu'ah runs from 30 min before the Dhuhr time until 60 min after it —
-90 minutes total. Friday's regular Dhuhr event is removed."*
 
 ---
 
 ## How it's hosted
 
-The feed is published as a **static file on GitHub Pages**, rebuilt nightly by a GitHub
-Action ([.github/workflows/publish.yml](.github/workflows/publish.yml)). No server, no
-hosting bill, no cold starts, nothing to keep awake.
+The app runs on **Vercel** ([api/index.js](api/index.js) + [vercel.json](vercel.json)):
 
-```
-nightly (02:17 UTC) ─┐
-push to main ────────┼─> npm ci -> verify -> build-site.js -> dist/ -> GitHub Pages
-manual dispatch ─────┘
-```
+- `/` — the settings editor
+- `/prayers.ics` — the feed, computed on every request, so it never runs out
 
-`src/build-site.js` writes `dist/prayers.ics` (a fresh 180-day window) and `dist/index.html`
-(a landing page with the subscribe link and today's times). The workflow runs `verify.js`
-first, so a config change that breaks the timing rules fails the build instead of quietly
-publishing wrong times.
+**Every calendar event links back to the editor.** Open Fajr in your calendar and its
+description carries `…/#fajr`, which opens the editor on Fajr's row.
 
-### Changing settings
+### How saving works
 
-The settings UI needs a server to save changes, so it runs on your own machine:
+Vercel's filesystem is read-only, so the editor can't write `config.json` to disk there.
+Instead a save **commits `config.json` to this repo** through the GitHub API
+([src/store.js](src/store.js)). The repo stays the single source of truth, every change is
+a commit you can inspect or revert, and the feed reads the new settings straight away.
 
-```bash
-npm start
-```
+| Variable (set in Vercel) | Purpose |
+|---|---|
+| `GITHUB_REPO` | `owner/name` of this repo |
+| `GITHUB_TOKEN` | Fine-grained token: this repo only, **Contents: read and write** |
+| `ADMIN_PASSWORD` | Required to save. Without it the editor is view-only. |
+| `PUBLIC_URL` | Optional. Fixes the address used in event links. |
 
-Edit at <http://localhost:3000>, press **Save changes** (writes `config.json`), then:
+Without the token the site still serves the feed; the editor just opens view-only and says so.
 
-```bash
-git add config.json && git commit -m "Update prayer settings" && git push
-```
+### GitHub Pages mirror
 
-The push triggers a rebuild and your calendar picks it up on its next refresh. Your laptop
-does **not** need to stay on — the published feed keeps working regardless.
+[.github/workflows/publish.yml](.github/workflows/publish.yml) still runs on every push and
+nightly: it checks the timing rules (`verify.js`, which fails the build on a mismatch) and
+publishes a static copy of the feed to GitHub Pages. Subscribe to **one** feed, not both —
+they contain the same events.
 
-### Self-hosting the server instead (optional)
+### Running locally
 
-`npm start` also serves the feed at `/prayers.ics`, so the app can run as a normal web
-service on Render/Railway/Fly/a VPS if you ever want the settings UI online. It reads `PORT`
-from the environment. If you do that, set `ADMIN_PASSWORD` so strangers can't edit your
-settings, and note that hosts with ephemeral disks reset `config.json` on redeploy unless you
-point `CONFIG_PATH` at a persistent disk.
+`npm start` serves the same app at <http://localhost:3000>, reading and writing
+`config.json` on disk. No password or token needed.
 
 ---
 
@@ -136,11 +129,3 @@ Settings → **Add calendar** → **From URL** → paste your `/prayers.ics` lin
 
 Calendars re-check the link every several hours. Because each event carries a stable ID
 (date + prayer), edits **update events in place** rather than creating duplicates.
-
-## Environment variables
-
-| Variable | Purpose |
-|---|---|
-| `PORT` | Port to listen on (default 3000) |
-| `ADMIN_PASSWORD` | If set, saving settings requires this password |
-| `CONFIG_PATH` | Where to read/write settings (use for a persistent disk) |

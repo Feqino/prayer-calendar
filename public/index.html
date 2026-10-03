@@ -18,6 +18,8 @@
 
 <main class="wrap">
 
+  <div class="notice" id="notice" hidden></div>
+
   <!-- ── Subscribe ───────────────────────────────────────────── -->
   <section class="card accent">
     <h2>Your calendar link</h2>
@@ -62,19 +64,19 @@
   <section class="card">
     <h2>The five prayers</h2>
     <p class="muted">
-      <b>Starts before</b> = how many minutes before the adhan the event opens.
-      <b>Total length</b> = how long the whole event runs.
-      <br>Example: 10 before + 40 total = from 10 min before the adhan until 30 min after.
+      <b>Before adhan</b> = minutes before the adhan that the event opens.
+      <b>After adhan</b> = minutes it keeps running after the adhan.
+      <br>Example: 10 before + 30 after = a 40-minute event around the adhan.
     </p>
     <div class="tablehead">
-      <span>Prayer</span><span>On</span><span>Starts before</span><span>Total length</span><span>Alert</span><span>Fine-tune</span>
+      <span>Prayer</span><span>On</span><span>Before adhan</span><span>After adhan</span><span>Alert</span><span>Fine-tune</span>
     </div>
     <div id="prayerRows"></div>
     <p class="muted small">“Fine-tune” shifts the calculated adhan time itself, in minutes, if your local mosque differs.</p>
   </section>
 
   <!-- ── Jumu'ah ─────────────────────────────────────────────── -->
-  <section class="card jumuah">
+  <section class="card jumuah" id="jumuahCard">
     <h2>🕌 Jumu'ah (Friday)</h2>
     <div class="switchrow">
       <label class="switch"><input type="checkbox" id="jEnabled"><span>Add a Jumu'ah event on Fridays</span></label>
@@ -98,8 +100,8 @@
       <label id="jFixedWrap">Fixed time<input id="jFixedTime" type="time"></label>
       <label id="jOffsetWrap">Minutes after Dhuhr<input id="jOffset" type="number" min="-120" max="240" step="5"></label>
 
-      <label>Starts before (min)<input id="jLead" type="number" min="0" max="180" step="5"></label>
-      <label>Total length (min)<input id="jDuration" type="number" min="5" max="480" step="5"></label>
+      <label>Before the prayer (min)<input id="jLead" type="number" min="0" max="180" step="5"></label>
+      <label>After the prayer (min)<input id="jAfter" type="number" min="0" max="480" step="5"></label>
       <label>Alert before (min)<input id="jReminder" type="number" min="0" max="240" step="5"></label>
       <label class="span2">Notes<input id="jNotes" maxlength="500" placeholder="Optional note on the event"></label>
     </div>

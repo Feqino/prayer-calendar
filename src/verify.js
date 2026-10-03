@@ -24,7 +24,7 @@ for (const day of days) {
   console.log('');
 }
 
-// --- assertions on the requested rules ---------------------------------------
+// --- every event must match the lead/length its settings ask for --------------
 let failures = 0;
 const check = (cond, msg) => {
   if (!cond) { console.log(`   FAIL: ${msg}`); failures++; }
@@ -33,20 +33,15 @@ const check = (cond, msg) => {
 for (const day of days) {
   for (const ev of day.events) {
     const leadActual = Math.round((ev.adhan - ev.start) / 60000);
-    const afterActual = Math.round((ev.end - ev.adhan) / 60000);
     check(leadActual === ev.leadMinutes, `${day.dateKey} ${ev.label}: lead ${leadActual} != ${ev.leadMinutes}`);
     check(
       Math.round((ev.end - ev.start) / 60000) === ev.durationMinutes,
       `${day.dateKey} ${ev.label}: total length wrong`
     );
-    if (ev.key === 'fajr') check(ev.durationMinutes === 50 && leadActual === 10 && afterActual === 40, `${day.dateKey} Fajr should be -10/+40 (50m)`);
-    if (['dhuhr', 'asr', 'maghrib', 'isha'].includes(ev.key)) {
-      check(ev.durationMinutes === 40 && leadActual === 10 && afterActual === 30, `${day.dateKey} ${ev.label} should be -10/+30 (40m)`);
-    }
-    if (ev.key === 'jumuah') check(ev.durationMinutes === 90 && leadActual === 30, `${day.dateKey} Jumu'ah should be -30, 90m total`);
   }
 }
 console.log(failures === 0 ? '== Timing rules: all checks passed ==' : `== ${failures} check(s) FAILED ==`);
+if (failures) process.exitCode = 1; // fail CI rather than publish wrong times
 
 // --- compare adhan times against the Aladhan API ------------------------------
 const ALADHAN_METHOD = { Egyptian: 5, MuslimWorldLeague: 3, Karachi: 1, UmmAlQura: 4, NorthAmerica: 2, Tehran: 7, Dubai: 16, Qatar: 10, Kuwait: 9, Singapore: 11, Turkey: 13 };

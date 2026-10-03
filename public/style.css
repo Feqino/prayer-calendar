@@ -168,3 +168,19 @@ code { background: #ece9e1; padding: 1px 6px; border-radius: 5px; font-size: .85
   .savebar { background: rgba(20,23,21,.94); }
   code { background: #262c27; }
 }
+
+/* notice shown when this deployment can't save */
+.notice {
+  margin: 20px 0 0; padding: 12px 16px;
+  background: #fff7e0; border: 1px solid #ecd28a; border-radius: 11px;
+  color: #6b5416; font-size: .9rem;
+}
+
+/* per-row total, and the highlight when arriving from a calendar event link */
+.total { color: var(--muted); font-weight: 400; font-size: .8rem; margin-left: 4px; }
+.prow.focused { background: var(--green-soft); box-shadow: 0 0 0 10px var(--green-soft); border-radius: 6px; }
+.card.focused { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+@media (prefers-color-scheme: dark) {
+  .notice { background: #241f14; border-color: #3d3421; color: #d8c48d; }
+}
