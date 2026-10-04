@@ -31,7 +31,7 @@
       "label": "Fajr",
       "emoji": "🌙",
       "leadMinutes": 10,
-      "durationMinutes": 50,
+      "durationMinutes": 60,
       "reminderMinutes": 0
     },
     "sunrise": {
