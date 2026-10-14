@@ -129,3 +129,22 @@ Settings → **Add calendar** → **From URL** → paste your `/prayers.ics` lin
 
 Calendars re-check the link every several hours. Because each event carries a stable ID
 (date + prayer), edits **update events in place** rather than creating duplicates.
+
+## Blocking prayer times for other people (Google Calendar)
+
+A calendar added "From URL" is ignored when Google works out your availability, so
+people inviting you or using your booking page still see prayer times as free.
+[google-apps-script/PrayerSync.gs](google-apps-script/PrayerSync.gs) fixes that: it runs
+in your own Google account and copies the feed into your main calendar every hour.
+
+1. Go to <https://script.google.com> → **New project**, paste the whole file over the
+   starter code, and save.
+2. **Services +** (left sidebar) → **Google Calendar API** → **Add**.
+3. Pick `setup` in the function menu → **Run** → approve the permissions (it's your own
+   script, so Google shows "unverified app": **Advanced → Go to … (unsafe)**).
+4. Remove the "From URL" subscription in Google Calendar so prayers don't appear twice.
+
+It keeps the next 60 days in your calendar, follows every change made in the editor
+within an hour, never adds notifications beyond the editor's alert, and leaves past
+events alone. To undo everything, run `removeAll`. `npm run test-sync` exercises it
+against a fake calendar.

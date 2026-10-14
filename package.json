@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/server.js",
     "ics": "node src/generate-file.js",
-    "test-times": "node src/verify.js"
+    "test-times": "node src/verify.js",
+    "test-sync": "node google-apps-script/test-sync.mjs"
   },
   "engines": {
     "node": ">=20"
