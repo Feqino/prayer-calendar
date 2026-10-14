@@ -32,7 +32,8 @@
       "emoji": "🌙",
       "leadMinutes": 10,
       "durationMinutes": 60,
-      "reminderMinutes": 0
+      "reminderMinutes": 0,
+      "showAs": "busy"
     },
     "sunrise": {
       "enabled": false,
@@ -40,7 +41,8 @@
       "emoji": "🌅",
       "leadMinutes": 0,
       "durationMinutes": 15,
-      "reminderMinutes": 0
+      "reminderMinutes": 0,
+      "showAs": "busy"
     },
     "dhuhr": {
       "enabled": true,
@@ -48,7 +50,8 @@
       "emoji": "☀️",
       "leadMinutes": 10,
       "durationMinutes": 40,
-      "reminderMinutes": 0
+      "reminderMinutes": 0,
+      "showAs": "busy"
     },
     "asr": {
       "enabled": true,
@@ -56,7 +59,8 @@
       "emoji": "🌤️",
       "leadMinutes": 10,
       "durationMinutes": 40,
-      "reminderMinutes": 0
+      "reminderMinutes": 0,
+      "showAs": "busy"
     },
     "maghrib": {
       "enabled": true,
@@ -64,7 +68,8 @@
       "emoji": "🌇",
       "leadMinutes": 10,
       "durationMinutes": 40,
-      "reminderMinutes": 0
+      "reminderMinutes": 0,
+      "showAs": "busy"
     },
     "isha": {
       "enabled": true,
@@ -72,7 +77,8 @@
       "emoji": "🌃",
       "leadMinutes": 10,
       "durationMinutes": 40,
-      "reminderMinutes": 0
+      "reminderMinutes": 0,
+      "showAs": "busy"
     }
   },
   "jumuah": {
@@ -87,6 +93,7 @@
     "timeMode": "dhuhr",
     "fixedTime": "13:00",
     "offsetMinutesFromDhuhr": 30,
-    "notes": ""
+    "notes": "",
+    "showAs": "busy"
   }
 }

@@ -92,7 +92,7 @@ input[readonly] { background: #f4f2ec; color: var(--muted); }
 /* prayer table */
 .tablehead, .prow {
   display: grid;
-  grid-template-columns: 1.4fr .5fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1.3fr .45fr 1fr 1fr .9fr .9fr 1fr;
   gap: 10px; align-items: center;
 }
 .tablehead {
@@ -184,3 +184,5 @@ code { background: #ece9e1; padding: 1px 6px; border-radius: 5px; font-size: .85
 @media (prefers-color-scheme: dark) {
   .notice { background: #241f14; border-color: #3d3421; color: #d8c48d; }
 }
+
+.prow select { padding: 7px 8px; font-size: .9rem; }

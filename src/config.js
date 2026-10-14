@@ -90,6 +90,7 @@ export function sanitizeConfig(input, current) {
       leadMinutes: clamp(p.leadMinutes, 0, 180, cur.leadMinutes ?? 10),
       durationMinutes: clamp(p.durationMinutes, 5, 480, cur.durationMinutes ?? 40),
       reminderMinutes: clamp(p.reminderMinutes, 0, 240, cur.reminderMinutes ?? 0),
+      showAs: ['busy', 'free'].includes(p.showAs) ? p.showAs : (cur.showAs || 'busy'),
     };
   }
 
@@ -107,6 +108,7 @@ export function sanitizeConfig(input, current) {
     leadMinutes: clamp(j.leadMinutes, 0, 180, curJ.leadMinutes),
     durationMinutes: clamp(j.durationMinutes, 5, 480, curJ.durationMinutes),
     reminderMinutes: clamp(j.reminderMinutes, 0, 240, curJ.reminderMinutes),
+    showAs: ['busy', 'free'].includes(j.showAs) ? j.showAs : (curJ.showAs || 'busy'),
     timeMode,
     fixedTime,
     offsetMinutesFromDhuhr: clamp(j.offsetMinutesFromDhuhr, -120, 240, curJ.offsetMinutesFromDhuhr),

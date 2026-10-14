@@ -82,6 +82,7 @@ function buildPrayerRows() {
       <label class="mini"><span>After adhan</span><input type="number" id="${k}-after" min="0" max="480" step="5"></label>
       <label class="mini"><span>Alert</span><input type="number" id="${k}-reminder" min="0" max="240" step="5"></label>
       <label class="mini"><span>Fine-tune</span><input type="number" id="${k}-adjust" min="-60" max="60" step="1"></label>
+      <label class="mini"><span>Show as</span><select id="${k}-showAs"><option value="busy">Busy</option><option value="free">Free</option></select></label>
     </div>`).join('');
 }
 
@@ -104,6 +105,7 @@ function formFromConfig(c) {
     $(`${k}-lead`).value = p.leadMinutes;
     $(`${k}-after`).value = Math.max(0, p.durationMinutes - p.leadMinutes);
     $(`${k}-reminder`).value = p.reminderMinutes;
+    $(`${k}-showAs`).value = p.showAs || 'busy';
     $(`${k}-adjust`).value = c.calculation.adjustments[k] || 0;
     $(`row-${k}`).classList.toggle('off', !p.enabled);
   }
@@ -120,6 +122,7 @@ function formFromConfig(c) {
   $('jLead').value = j.leadMinutes;
   $('jAfter').value = Math.max(0, j.durationMinutes - j.leadMinutes);
   $('jReminder').value = j.reminderMinutes;
+  $('jShowAs').value = j.showAs || 'busy';
   $('jNotes').value = j.notes;
 
   syncChrome();
@@ -137,6 +140,7 @@ function configFromForm() {
       leadMinutes: num(`${k}-lead`),
       durationMinutes: total(`${k}-lead`, `${k}-after`),
       reminderMinutes: num(`${k}-reminder`),
+      showAs: $(`${k}-showAs`).value,
     };
   }
 
@@ -165,6 +169,7 @@ function configFromForm() {
       leadMinutes: num('jLead'),
       durationMinutes: total('jLead', 'jAfter'),
       reminderMinutes: num('jReminder'),
+      showAs: $('jShowAs').value,
       timeMode: $('jTimeMode').value,
       fixedTime: $('jFixedTime').value,
       offsetMinutesFromDhuhr: num('jOffset'),

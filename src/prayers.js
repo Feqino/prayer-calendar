@@ -98,6 +98,7 @@ function makeEvent(key, cfg, adhanTime, feed, tz, extra = {}) {
     leadMinutes: lead,
     durationMinutes: duration,
     reminderMinutes: cfg.reminderMinutes ?? feed.defaultReminderMinutes ?? 0,
+    showAs: cfg.showAs === 'free' ? 'free' : 'busy',
     adhanLocal: DateTime.fromJSDate(adhanTime).setZone(tz).toFormat('HH:mm'),
     startLocal: DateTime.fromJSDate(start).setZone(tz).toFormat('HH:mm'),
     endLocal: DateTime.fromJSDate(end).setZone(tz).toFormat('HH:mm'),

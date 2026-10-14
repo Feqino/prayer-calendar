@@ -83,7 +83,8 @@ export function buildICS(days, config, opts = {}) {
       lines.push('DESCRIPTION:' + escapeText(desc));
       if (editUrl) lines.push('URL;VALUE=URI:' + editUrl);
       if (ev.location) lines.push('LOCATION:' + escapeText(ev.location));
-      lines.push('TRANSP:TRANSPARENT');
+      // OPAQUE = Busy, TRANSPARENT = Free; set per prayer.
+      lines.push('TRANSP:' + (ev.showAs === 'free' ? 'TRANSPARENT' : 'OPAQUE'));
 
       if (ev.reminderMinutes > 0) {
         lines.push('BEGIN:VALARM');

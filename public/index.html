@@ -69,7 +69,7 @@
       <br>Example: 10 before + 30 after = a 40-minute event around the adhan.
     </p>
     <div class="tablehead">
-      <span>Prayer</span><span>On</span><span>Before adhan</span><span>After adhan</span><span>Alert</span><span>Fine-tune</span>
+      <span>Prayer</span><span>On</span><span>Before adhan</span><span>After adhan</span><span>Alert</span><span>Fine-tune</span><span>Show as</span>
     </div>
     <div id="prayerRows"></div>
     <p class="muted small">“Fine-tune” shifts the calculated adhan time itself, in minutes, if your local mosque differs.</p>
@@ -103,6 +103,7 @@
       <label>Before the prayer (min)<input id="jLead" type="number" min="0" max="180" step="5"></label>
       <label>After the prayer (min)<input id="jAfter" type="number" min="0" max="480" step="5"></label>
       <label>Alert before (min)<input id="jReminder" type="number" min="0" max="240" step="5"></label>
+      <label>Show in my calendar as<select id="jShowAs"><option value="busy">Busy</option><option value="free">Free</option></select></label>
       <label class="span2">Notes<input id="jNotes" maxlength="500" placeholder="Optional note on the event"></label>
     </div>
     <p class="jsummary" id="jSummary"></p>
