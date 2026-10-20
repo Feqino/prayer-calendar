@@ -186,3 +186,10 @@ code { background: #ece9e1; padding: 1px 6px; border-radius: 5px; font-size: .85
 }
 
 .prow select { padding: 7px 8px; font-size: .9rem; }
+
+/* sleep card */
+.card.sleep { border-color: #d6d3ea; background: linear-gradient(180deg, #f3f2fb, #fff 60%); }
+.card.sleep.off .grid { opacity: .5; }
+@media (prefers-color-scheme: dark) {
+  .card.sleep { border-color: #34324a; background: linear-gradient(180deg, #1c1b28, var(--card) 60%); }
+}

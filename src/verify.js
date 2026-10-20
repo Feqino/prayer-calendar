@@ -40,6 +40,24 @@ for (const day of days) {
     );
   }
 }
+
+// Sleep: from Isha + after to the NEXT day's Fajr − before. Checked with sleep
+// switched on even when the saved settings have it off, across a DST change.
+const withSleep = { ...config, sleep: { afterIshaMinutes: 120, beforeFajrMinutes: 30, ...config.sleep, enabled: true } };
+const sleepDays = computeSchedule(withSleep, { days: 60 });
+for (let i = 0; i < sleepDays.length - 1; i++) {
+  const day = sleepDays[i].dateKey;
+  const s = sleepDays[i].events.find((e) => e.key === 'sleep');
+  const isha = sleepDays[i].events.find((e) => e.key === 'isha');
+  const fajrNext = sleepDays[i + 1].events.find((e) => e.key === 'fajr');
+  check(Boolean(s), `${day}: no sleep event`);
+  if (!s) continue;
+  if (isha) check(s.adhan.getTime() === isha.adhan.getTime(), `${day} sleep: not anchored to that night's Isha`);
+  if (fajrNext) check(s.nextFajr.getTime() === fajrNext.adhan.getTime(), `${day} sleep: not anchored to the next morning's Fajr`);
+  check(s.start - s.adhan === s.afterIshaMinutes * 60000, `${day} sleep: start is not Isha + ${s.afterIshaMinutes}m`);
+  check(s.nextFajr - s.end === s.beforeFajrMinutes * 60000, `${day} sleep: end is not Fajr − ${s.beforeFajrMinutes}m`);
+}
+
 console.log(failures === 0 ? '== Timing rules: all checks passed ==' : `== ${failures} check(s) FAILED ==`);
 if (failures) process.exitCode = 1; // fail CI rather than publish wrong times
 

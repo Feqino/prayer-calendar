@@ -109,6 +109,24 @@
     <p class="jsummary" id="jSummary"></p>
   </section>
 
+  <!-- ── Sleep ───────────────────────────────────────────────── -->
+  <section class="card sleep" id="sleepCard">
+    <h2>😴 Sleep</h2>
+    <p class="muted">A nightly block from a set time after Isha until a set time before the next morning's Fajr.</p>
+    <div class="switchrow">
+      <label class="switch"><input type="checkbox" id="sEnabled"><span>Add a sleep block every night</span></label>
+    </div>
+    <div class="grid">
+      <label>Starts after Isha (min)<input id="sAfter" type="number" min="0" max="600" step="5"></label>
+      <label>Ends before Fajr (min)<input id="sBefore" type="number" min="0" max="600" step="5"></label>
+      <label>Event title<input id="sLabel" maxlength="60"></label>
+      <label>Emoji<input id="sEmoji" maxlength="8"></label>
+      <label>Alert before (min)<input id="sReminder" type="number" min="0" max="240" step="5"></label>
+      <label>Show in my calendar as<select id="sShowAs"><option value="busy">Busy</option><option value="free">Free</option></select></label>
+    </div>
+    <p class="jsummary" id="sSummary"></p>
+  </section>
+
   <!-- ── Preview ─────────────────────────────────────────────── -->
   <section class="card">
     <h2>Preview <span class="muted small">— next 7 days, live</span></h2>

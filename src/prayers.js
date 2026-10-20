@@ -107,6 +107,42 @@ function makeEvent(key, cfg, adhanTime, feed, tz, extra = {}) {
   };
 }
 
+// Sleep runs from `afterIshaMinutes` after tonight's Isha until
+// `beforeFajrMinutes` before tomorrow's Fajr, so it crosses midnight and
+// belongs to the day of the Isha it follows. Returns null when the settings
+// leave less than 15 minutes of sleep.
+function makeSleepEvent(sleep, isha, nextFajr, feed, tz) {
+  const after = sleep.afterIshaMinutes ?? 0;
+  const before = sleep.beforeFajrMinutes ?? 0;
+  const start = new Date(isha.getTime() + after * 60000);
+  const end = new Date(nextFajr.getTime() - before * 60000);
+  const duration = Math.round((end - start) / 60000);
+  if (duration < 15) return null;
+
+  const local = (d) => DateTime.fromJSDate(d).setZone(tz).toFormat('HH:mm');
+  return {
+    key: 'sleep',
+    label: sleep.label || 'Sleep',
+    emoji: sleep.emoji || '',
+    adhan: isha,               // anchor: the event is timed relative to Isha …
+    nextFajr,                  // … and to the next morning's Fajr
+    start,
+    end,
+    leadMinutes: -after,       // negative lead: starts after the anchor
+    durationMinutes: duration,
+    afterIshaMinutes: after,
+    beforeFajrMinutes: before,
+    reminderMinutes: sleep.reminderMinutes ?? feed.defaultReminderMinutes ?? 0,
+    showAs: sleep.showAs === 'free' ? 'free' : 'busy',
+    adhanLocal: local(isha),
+    startLocal: local(start),
+    endLocal: local(end),
+    detail: `From ${after} min after Isha (${local(isha)}) until ${before} min before Fajr (${local(nextFajr)}).`,
+    location: '',
+    notes: sleep.notes || '',
+  };
+}
+
 // Returns an array of days: { dateKey, dateLabel, isFriday, events: [...] }
 export function computeSchedule(config, opts = {}) {
   const { location, calculation, feed, prayers, jumuah } = config;
@@ -118,12 +154,15 @@ export function computeSchedule(config, opts = {}) {
   const days = [];
   const startLocal = DateTime.now().setZone(tz).startOf('day');
 
+  // adhan reads Y/M/D through local getters; building the Date from these
+  // numbers keeps the calendar day independent of the server's own timezone.
+  const timesFor = (local) =>
+    new adhan.PrayerTimes(coordinates, new Date(local.year, local.month - 1, local.day), params);
+  const sleep = config.sleep;
+
   for (let i = 0; i < dayCount; i++) {
     const local = startLocal.plus({ days: i });
-    // adhan reads Y/M/D through local getters; building the Date from these
-    // numbers keeps the calendar day independent of the server's own timezone.
-    const jsDate = new Date(local.year, local.month - 1, local.day);
-    const t = new adhan.PrayerTimes(coordinates, jsDate, params);
+    const t = timesFor(local);
     const isFriday = local.weekday === 5; // luxon: Mon=1 … Sun=7
 
     const raw = {
@@ -149,6 +188,11 @@ export function computeSchedule(config, opts = {}) {
     // Jumu'ah enabled but not replacing Dhuhr -> add it alongside.
     if (jumuahActive && !jumuah.replaceDhuhr) {
       events.push(makeEvent('jumuah', jumuah, jumuahAdhan(jumuah, local, raw.dhuhr, tz), feed, tz, jumuah));
+    }
+
+    if (sleep && sleep.enabled) {
+      const ev = makeSleepEvent(sleep, raw.isha, timesFor(local.plus({ days: 1 })).fajr, feed, tz);
+      if (ev) events.push(ev);
     }
 
     events.sort((a, b) => a.start - b.start);

@@ -136,6 +136,7 @@ async function previewHandler(req, res) {
           start: e.startLocal,
           end: e.endLocal,
           durationMinutes: e.durationMinutes,
+          detail: e.detail || '',
         })),
       })),
     });

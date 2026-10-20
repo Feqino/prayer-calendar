@@ -41,6 +41,18 @@ const bool = (b, fallback) => (typeof b === 'boolean' ? b : fallback);
 
 const TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
+// Off until the user picks their own numbers in the editor.
+export const SLEEP_DEFAULTS = {
+  enabled: false,
+  label: 'Sleep',
+  emoji: '😴',
+  afterIshaMinutes: 120,
+  beforeFajrMinutes: 30,
+  reminderMinutes: 0,
+  showAs: 'busy',
+  notes: '',
+};
+
 /**
  * Validate and normalize an incoming config. Throws on anything unusable
  * (bad coordinates/timezone); silently falls back to `current` values for
@@ -115,6 +127,20 @@ export function sanitizeConfig(input, current) {
     notes: str(j.notes, 500, ''),
   };
 
+  // Settings saved before sleep existed have no `sleep` block.
+  const s = input.sleep || {};
+  const curS = { ...SLEEP_DEFAULTS, ...(current.sleep || {}) };
+  const sleep = {
+    enabled: bool(s.enabled, curS.enabled),
+    label: str(s.label, 60) || curS.label,
+    emoji: str(s.emoji, 8, curS.emoji),
+    afterIshaMinutes: clamp(s.afterIshaMinutes, 0, 600, curS.afterIshaMinutes),
+    beforeFajrMinutes: clamp(s.beforeFajrMinutes, 0, 600, curS.beforeFajrMinutes),
+    reminderMinutes: clamp(s.reminderMinutes, 0, 240, curS.reminderMinutes),
+    showAs: ['busy', 'free'].includes(s.showAs) ? s.showAs : curS.showAs,
+    notes: str(s.notes, 500, ''),
+  };
+
   return {
     calendarName: str(input.calendarName, 80) || current.calendarName,
     location: {
@@ -127,5 +153,6 @@ export function sanitizeConfig(input, current) {
     feed,
     prayers,
     jumuah,
+    sleep,
   };
 }

@@ -75,6 +75,14 @@ adhan 13:08 · before 10 · after 30
 | Mosque / location | Optional — appears in the event's Location field |
 | Title, emoji, notes, alert | Cosmetic / reminder options |
 
+### Sleep
+
+An optional nightly block from a set number of minutes after Isha until a set number
+of minutes before the next morning's Fajr, so it follows the prayer times through the
+year (and across clock changes). It belongs to the night of the Isha it follows, has its
+own title, alert and Busy/Free setting, and its calendar event links to `/#sleep`.
+Off by default.
+
 ---
 
 ## How it's hosted

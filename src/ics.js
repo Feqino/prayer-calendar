@@ -68,8 +68,7 @@ export function buildICS(days, config, opts = {}) {
         : `${ev.durationMinutes} min from the adhan.`;
 
       const desc = [
-        `Adhan at ${ev.adhanLocal}`,
-        `This event runs ${window}`,
+        ...(ev.detail ? [ev.detail] : [`Adhan at ${ev.adhanLocal}`, `This event runs ${window}`]),
         ev.notes || null,
         editUrl ? `\nChange ${ev.label}'s timings:\n${editUrl}` : null,
       ].filter(Boolean).join('\n');

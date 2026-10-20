@@ -95,5 +95,15 @@
     "offsetMinutesFromDhuhr": 30,
     "notes": "",
     "showAs": "busy"
+  },
+  "sleep": {
+    "enabled": false,
+    "label": "Sleep",
+    "emoji": "😴",
+    "afterIshaMinutes": 120,
+    "beforeFajrMinutes": 30,
+    "reminderMinutes": 0,
+    "showAs": "busy",
+    "notes": ""
   }
 }

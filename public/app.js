@@ -47,12 +47,13 @@ function showSaveState() {
 function focusFromHash() {
   const key = location.hash.replace('#', '').toLowerCase();
   if (!key) return;
-  const isJumuah = key === 'jumuah';
-  const target = isJumuah ? $('jumuahCard') : $(`row-${key}`);
+  const cards = { jumuah: ['jumuahCard', 'jAfter'], sleep: ['sleepCard', 'sAfter'] };
+  const [targetId, fieldId] = cards[key] || [`row-${key}`, `${key}-after`];
+  const target = $(targetId);
   if (!target) return;
   target.classList.add('focused');
   target.scrollIntoView({ block: 'center' });
-  const field = isJumuah ? $('jAfter') : $(`${key}-after`);
+  const field = $(fieldId);
   if (field) field.focus({ preventScroll: true });
 }
 
@@ -125,7 +126,24 @@ function formFromConfig(c) {
   $('jShowAs').value = j.showAs || 'busy';
   $('jNotes').value = j.notes;
 
+  const s = sleepSettings(c);
+  $('sEnabled').checked = s.enabled;
+  $('sAfter').value = s.afterIshaMinutes;
+  $('sBefore').value = s.beforeFajrMinutes;
+  $('sLabel').value = s.label;
+  $('sEmoji').value = s.emoji;
+  $('sReminder').value = s.reminderMinutes;
+  $('sShowAs').value = s.showAs;
+
   syncChrome();
+}
+
+// Settings saved before sleep existed have no `sleep` block.
+function sleepSettings(c) {
+  return {
+    enabled: false, label: 'Sleep', emoji: '😴', afterIshaMinutes: 120, beforeFajrMinutes: 30,
+    reminderMinutes: 0, showAs: 'busy', notes: '', ...(c.sleep || {}),
+  };
 }
 
 function configFromForm() {
@@ -175,6 +193,16 @@ function configFromForm() {
       offsetMinutesFromDhuhr: num('jOffset'),
       notes: $('jNotes').value,
     },
+    sleep: {
+      enabled: $('sEnabled').checked,
+      label: $('sLabel').value,
+      emoji: $('sEmoji').value,
+      afterIshaMinutes: num('sAfter'),
+      beforeFajrMinutes: num('sBefore'),
+      reminderMinutes: num('sReminder'),
+      showAs: $('sShowAs').value,
+      notes: sleepSettings(config).notes,
+    },
   };
 }
 
@@ -212,6 +240,23 @@ function syncChrome() {
     ? `Every Friday: “${$('jEmoji').value} ${$('jLabel').value}” runs from ${lead} min before ${when} until ${after} min after it — ${dur} minutes total.`
       + ($('jReplace').checked ? ' Friday’s regular Dhuhr event is removed.' : ' Friday’s Dhuhr stays as well.')
     : 'Jumu’ah is turned off — Fridays use the normal Dhuhr event.';
+
+  $('sleepCard').classList.toggle('off', !$('sEnabled').checked);
+  if (!$('sEnabled').checked) $('sSummary').textContent = 'Sleep is turned off — no sleep block is added.';
+}
+
+// Tonight's actual sleep window, taken from the live preview.
+function showSleepSummary(days) {
+  if (!$('sEnabled').checked) return;
+  const tonight = days[0]?.events.find((e) => e.key === 'sleep');
+  if (!tonight) {
+    $('sSummary').textContent = 'These numbers leave less than 15 minutes between Isha and Fajr, so no sleep block would be added.';
+    return;
+  }
+  const h = Math.floor(tonight.durationMinutes / 60);
+  const m = tonight.durationMinutes % 60;
+  $('sSummary').textContent =
+    `Tonight: ${tonight.start} → ${tonight.end} (${h}h ${m}m), starting ${num('sAfter')} min after Isha and ending ${num('sBefore')} min before Fajr. It moves with the prayer times every night.`;
 }
 
 // ── preview ──────────────────────────────────────────────────────────────────
@@ -236,10 +281,13 @@ async function refreshPreview() {
         ${d.events.map((e) => `
           <div class="pev">
             <b>${e.emoji} ${esc(e.label)}</b>
-            <span class="adh">adhan ${e.adhan}</span>
-            <span class="rng">event ${e.start} – ${e.end} (${e.durationMinutes}m)</span>
+            ${e.key === 'sleep'
+              ? `<span class="rng">${e.start} – ${e.end} (${Math.floor(e.durationMinutes / 60)}h ${e.durationMinutes % 60}m)</span>`
+              : `<span class="adh">adhan ${e.adhan}</span>
+                 <span class="rng">event ${e.start} – ${e.end} (${e.durationMinutes}m)</span>`}
           </div>`).join('')}
       </div>`).join('');
+    showSleepSummary(data.days);
   } catch (err) {
     $('preview').innerHTML = `<span class="status err">${esc(err.message)}</span>`;
   }
